@@ -1,0 +1,10 @@
+name: EAD3_Validator
+title: EAD3 Validator
+username: gkacton
+account: gkacton
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16228845
+bundleId: 11268998
+url: https://gkacton.shinyapps.io/EAD3_Validator/
+version: 1

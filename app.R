@@ -24,27 +24,27 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-	table = reactive({
-		xmlSchemaValidate(schema = xmlSchemaParse("ead3_undeprecated.xsd"),
+	validation <-  reactive({
+		validate(
+			need(input$XML, message = "Please upload an XML document.")
+		)
+		
+		validation_out <- xmlSchemaValidate(schema = xmlSchemaParse("ead3_undeprecated.xsd"),
 						  doc = xmlParse(input$XML$datapath))$errors %>% 
-			as.character() %>% 
-			str_remove("list\\(msg = ") %>% 
-			str_remove_all("\\\\n") %>% 
-			str_remove_all("\\{http://ead3.archivists.org/schema/undeprecated/\\}") %>% 
-			str_remove_all('\\"') %>% 
-			str_remove_all("line = ") %>% 
-			strsplit(split=",") %>% 
-			tibble(.name_repair = "unique") %>% 
-			bind_rows() %>% 
-			unnest_wider(col = ".",
-						 names_sep = "x") %>% 
-			rename(c("msg" = ".x1", "code" = ".x2", "dom" = ".x3", "line" = ".x4", "col" = ".x5", "lev" = ".x6", "other" = ".x7")) %>% 
-			as_data_frame() %>% 
-			select(msg, line) %>% 
-			rename("error" = "msg")
+		cbind() %>% 
+		as_data_frame()
+		
+		validation_table <- as_tibble(matrix(ncol=2, nrow=1000), name_repair="unique")
+		colnames(validation_table) <- c("message", "line")
+		
+		for(i in 1:nrow(validation_out)){
+			validation_table$message[i] <- as.character(validation_out$.[[i]][1])
+			validation_table$line[i] <- as.character(validation_out$.[[i]][4])
+		}
+		validation_table %>% filter(is.na(message) == F)
 	})
 	
-	output$Validation <- renderTable({table()})
+	output$Validation <- renderTable(validation())
 	
 	# ead3_xsl <- read_xml("EAD3toHTML.xsl")
 	# 
